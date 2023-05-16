@@ -1,0 +1,20 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ticket-system-master-backend
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: ticket-system-master-backend
+    spec:
+      containers:
+        - name: ticket-system-master-backend
+          image: rohan2801/ticket-system-master-backend:v0
+          ports:
+            - containerPort: 5000
+              name: nodejs-port
+  selector:
+    matchLabels:
+      app: ticket-system-master-backend

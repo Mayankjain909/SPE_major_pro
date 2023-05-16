@@ -1,0 +1,2 @@
+k port-forward service/ticket-system-master-frontend 3000:3000
+k port-forward service/ticket-system-master-backend 5000:5000

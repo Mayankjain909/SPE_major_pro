@@ -1,0 +1,20 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ticket-system-master-frontend
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: ticket-system-master-frontend
+    spec:
+      containers:
+        - name: ticket-system-master-frontend
+          image: rohan2801/ticket-system-master-frontend:v0
+          ports:
+            - containerPort: 3000
+              name: http-port
+  selector:
+    matchLabels:
+      app: ticket-system-master-frontend
