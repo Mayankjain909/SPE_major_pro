@@ -1,0 +1,19 @@
+docker login
+cd bsckend
+docker build -t jainmayank909/backend:latest .
+docker push jainmayank909/backend:latest
+cd ../
+cd frontend
+docker build -t jainmayank909/frontend:latest .
+docker push jainmayank909/frontend:latest.
+
+k apply -f backend-deployment
+k apply -f backend-service
+k apply -f frontend-deployment
+k apply -f frontend-service
+
+upaar wale charo ke liye -- 'k get all' command use karte rehna inorder to see if they worked or not.
+
+ye dono command alag alag terminal mein chalane h ---
+k port-forward service/ticket-system-master-frontend 3000
+k port-forward service/ticket-system-master-backend 5000

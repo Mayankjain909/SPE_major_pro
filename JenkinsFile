@@ -1,0 +1,95 @@
+// This is a Jenkinsfile. It is a script that Jenkins will run when a build is triggered.
+pipeline {
+    // Telling Jenkins to run the pipeline on any available agent.
+    agent any
+
+    // Setting environment variables for the build.
+    environment {
+    //     MONGODB_URI = credentials('mongodb-uri')
+    //     TOKEN_KEY = credentials('token-key')
+    //     EMAIL = credentials('email')
+    //     PASSWORD = credentials('password')
+           DOCKER_USERNAME = 'jainmayank909'
+           DOCKER_PASSWORD = 'myk@19999'
+           PATH="$PATH:/opt/homebrew/bin:/usr/local/bin"
+    }
+
+    // This is the pipeline. It is a series of stages that Jenkins will run.
+    stages {
+        // This state is telling Jenkins to checkout the source code from the source control management system.
+        stage('Github Checkout') {
+            steps {
+                git url: 'https://github.com/Mayankjain909/SPE_major_pro.git',
+				branch: 'master',
+                credentialsId: 'github'
+            }
+        }
+        
+        // This stage is telling Jenkins to run the tests in the client directory.
+        stage('Client Setup') {
+            steps {
+                dir('frontend') {
+                    sh 'ls -alps'
+                    // sh 'export PATH="$PATH:/opt/homebrew/bin/node"'
+                    // sh 'echo $PATH'
+                    // sh 'cd frontend'
+                    sh 'npm install'
+                    // sh 'npm test'
+                }
+            }
+        }
+        
+        // This stage is telling Jenkins to run the tests in the server directory.
+        stage('Server Setup') {
+            steps {
+                dir('backend') {
+                    sh 'ls -alps'
+                    // sh 'cd backend'
+                    sh 'npm install'
+                    // sh 'export MONGODB_URI=$MONGODB_URI'
+                    // sh 'export TOKEN_KEY=$TOKEN_KEY'
+                    // sh 'export EMAIL=$EMAIL'
+                    // sh 'export PASSWORD=$PASSWORD'
+                    // sh 'npm test'
+                }
+            }
+        }
+        
+        // This stage is telling Jenkins to build the images for the client and server.
+        stage('Build Images') {
+            steps {
+                sh 'docker build -t jainmayank909/frontend frontend'
+                sh 'docker build -t jainmayank909/backend backend'
+            }
+        }
+        
+        // This stage is telling Jenkins to push the images to DockerHub.
+        stage('Push Images to DockerHub') {
+            steps {
+                // withCredentials([usernamePassword(credentialsId: 'dockerhub', passwordVariable: 'DOCKER_PASSWORD', usernameVariable: 'DOCKER_USERNAME')]) {
+                    sh 'docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD'
+                        
+                    sh 'docker push jainmayank909/frontend'
+                    sh 'docker push jainmayank909/backend'
+                // }
+            }
+        }
+        stage ('Apply Kubernetes manifests') {
+            steps {
+                
+                sh 'kubectl --kubeconfig=/home/mayank/.kube/config apply -f k8s/MongoDB-Pod.yml'
+                sh 'kubectl apply -f k8s/MongoDB-Service.yml --kubeconfig=/home/mayank/.kube/config'
+                sh 'kubectl apply -f k8s/Back-end-Deployment.yml --kubeconfig=/home/mayank/.kube/config'
+                sh 'kubectl apply -f k8s/Back-end-Service.yml --kubeconfig=/home/mayank/.kube/config'
+                sh 'kubectl apply -f k8s/Front-end-Deployment.yml --kubeconfig=/home/mayank/.kube/config'
+                sh 'kubectl apply -f k8s/Front-end-Service.yml --kubeconfig=/home/mayank/.kube/config'
+            }
+        }
+        // stage ('Setup port forwarding') {
+        //     steps {
+        //         sh 'kubectl port-forward service/ticket-system-master-backend 5000:5000'
+        //         sh 'kubectl port-forward service/ticket-system-master-frontend 3000:3000'
+        //     }
+        // }
+    }
+}
