@@ -14,8 +14,7 @@ spec:
           image: jainmayank909/frontend:latest
           ports:
             - containerPort: 3000
-              name: http-port
-              
+              name: http-port   
   selector:
     matchLabels:
       app: ticket-system-master-frontend
